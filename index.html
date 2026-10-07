@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CodeQuest</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<>
+
+    <header>
+        <h1>CodeQuest</h1>
+        <p>Learn. Code. Compete. Improve.</p>
+    </header>
+
+    <main>
+
+        <!-- HOME / DIFFICULTY SCREEN -->
+        <section class="difficulty-section" id="difficultyScreen">
+
+            <h2>Choose your difficulty</h2>
+
+            <div class="difficulty-buttons">
+                <button onclick="startChallenge('Easy')">Easy</button>
+                <button onclick="startChallenge('Medium')">Medium</button>
+                <button onclick="startChallenge('Hard')">Hard</button>
+            </div>
+
+        </section>
+
+        <!-- CODING CHALLENGE SCREEN -->
+        <section class="challenge-section" id="challengeScreen">
+
+            <h2>Coding Challenge</h2>
+
+            <p id="questionText">
+                Write your program below.
+            </p>
+
+            <h3>Write Your Program</h3>
+
+            <textarea id="codeInput" placeholder="Write your program here..." rows="15"></textarea>
+
+            <div class="action-buttons">
+                <button onclick="submitCode()">Submit</button>
+                <button onclick="clearCode()">Clear</button>
+            </div>
+
+            <h3>Output</h3>
+
+            <pre id="outputBox">Output will appear here...</pre>
+
+
+        </section>
+
+    </main>
+
+    <script>
+
+        function startChallenge(difficulty) {
+
+            document.getElementById("difficultyScreen").style.display = "none";
+            document.getElementById("challengeScreen").style.display = "block";
+
+            if (difficulty === "Easy") {
+                document.getElementById("questionText").innerText =
+                    "Write a program to print Hello World.";
+            }
+
+            if (difficulty === "Medium") {
+                document.getElementById("questionText").innerText =
+                    "Write a program to find the sum of two numbers.";
+            }
+
+            if (difficulty === "Hard") {
+                document.getElementById("questionText").innerText =
+                    "Write a program to find the largest number in an array.";
+            }
+        }
+
+        async function submitCode() {
+            let code = document.getElementById("codeInput").value;
+            const output = document.getElementById("outputBox");
+
+            if (code.trim() === "") {
+                output.innerText = "Please write your code first.";
+                return;
+            }
+
+            // Judge0 needs the Java class to be named Main
+            code = code.replace(/public\s+class\s+\w+/, "public class Main");
+
+            output.innerText = "Running...";
+
+            try {
+                const res = await fetch(
+                    "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ source_code: code, language_id: 62 }),
+                    }
+                );
+                const data = await res.json();
+                output.innerText =
+                    data.stdout || data.compile_output || data.stderr || JSON.stringify(data);
+            } catch (e) {
+                output.innerText = "Error: " + e.message;
+            }
+        }
+
+        function clearCode() {
+
+            document.getElementById("codeInput").value = "";
+
+            document.getElementById("outputBox").innerText =
+                "Output will appear here...";
+        }
+    </script>
+
+    </body>
+
+
+</html>
